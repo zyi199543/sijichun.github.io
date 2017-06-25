@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8" />
-<title>Untitled</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>Testing</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 
 <style type="text/css">
@@ -12216,9 +12216,15 @@ rGBcoJmZmZkVjAs0MzMzs4L5H5EBC9sDmRNUAAAAAElFTkSuQmCC
 <h1 id="&#38750;&#27491;&#24577;&#24635;&#20307;&#30340;&#22823;&#26679;&#26412;&#26816;&#39564;">&#38750;&#27491;&#24577;&#24635;&#20307;&#30340;&#22823;&#26679;&#26412;&#26816;&#39564;<a class="anchor-link" href="#&#38750;&#27491;&#24577;&#24635;&#20307;&#30340;&#22823;&#26679;&#26412;&#26816;&#39564;">&#182;</a></h1><p>如果$x_i\sim \left(  \mu, \sigma^2 \right)$，那么在大样本条件下，$\bar{x}\sim N\left(\mu,\frac{\sigma^2}{N}\right)$，或者，如果我们用样本方差替代总体方差，那么有：$$\frac{\bar{x}-\mu}{\sqrt{\frac{s^2}{N}}}\sim N\left(0,1\right)$$
 如果在原假设：$H_0:\mu=\mu_0$的条件下，我们的假设检验统计量：$$\frac{\bar{x}-\mu_0}{\sqrt{\frac{s^2}{N}}}\sim N\left(0,1\right)$$
 因而为了检验总体期望$\mu=\mu_0$，我们可以首先计算检验统计量，并确定拒绝域，进而做出决策。
-特别的，当$x_i\sim Ber(p)$，即服从概率为$p$的伯努利分布时，在大样本条件下，我们可以用样本比例$\hat{p}=\bar{x}$对总体概率$p$进行检验，z在$H_0:p=p_0$的原假设下，检验统计量为：$$\frac{\hat{p}-p_0}{\sqrt{\frac{p_0(1-p_0)}{N}}}\sim N\left(0,1\right)$$
-或者，我们也可以构造检验统计量：$$\frac{\hat{p}-p_0}{\sqrt{\frac{\hat{p}(1-\hat{p})}{N}}}\sim N\left(0,1\right)$$
-下面，我们将在原假设$H_0:p=0.5$的条件下，针对不同的真值$p_0$，重复1000次假设检验，比较以上两个检验统计量的势函数。</p>
+特别的，当$x_i\sim Ber(p)$，即服从概率为$p$的伯努利分布时，在大样本条件下，我们可以用样本比例$\hat{p}=\bar{x}$对总体概率$p$进行检验，在$H_0:p=p_0$的原假设下，我们有如下两个检验统计量：</p>
+<ul>
+<li>方法一： $$\frac{\hat{p}-p_0}{\sqrt{\frac{p_0(1-p_0)}{N}}}\sim N\left(0,1\right)$$</li>
+<li>方法二： $$\frac{\hat{p}-p_0}{\sqrt{\frac{\hat{p}(1-\hat{p})}{N}}}\sim N\left(0,1\right)$$
+根据大数定律，$\hat{p}\rightarrow^p p_0$，因而以上两种方法在大样本条件下应该是等价的，而小样本情况下可能存在差异。
+此外，我们还可以使用对数似然比检验（log likelihood ratio test）。我们知道，对于伯努利分布，其似然函数为：$$L\left(p|x\right)=\sum_{i=1}^{N}\left[ x_i\ln{p}+(1-x_i)\ln{1-p}\right]=N_1\ln{p}+(N-N_1)\ln{1-p}$$其中$N_1=\sum_{i=1}^N x_i$。在$H_0:p=p_0$的原假设下，即在$p=p_0$的约束下，似然函数为$$L\left(p_0|x\right)=N_1\ln{p_0}+(N-N_1)\ln{1-p_0}$$因而我们可以构建检验统计量：$$2\left[L\left(\hat{p}|x\right)-L\left(p_0|x\right)\right]\sim \chi^2(1)$$其中$\hat{p}$为$p$的极大似然估计。因而我们有：</li>
+<li>方法三：$$2\left[L\left(\frac{N_1}{N}|x\right)-L\left(p_0|x\right)\right]\sim \chi^2(1)$$
+接下来，我们将在原假设$H_0:p=0.5$的条件下，针对不同的真值$p_0$，重复1000次假设检验，比较以上三个检验统计量的势函数。</li>
+</ul>
 
 </div>
 </div>
