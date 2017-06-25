@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8" />
-<title>point_estimation</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>estimation</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 
 <style type="text/css">
@@ -11839,9 +11839,9 @@ div#notebook {
 <div class="prompt"></div>
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Bias =  [ 0.0558511   0.01944604]
-s.e. =  [ 0.35556016  0.10398562]
-RMSE =  [ 0.35991995  0.10578827]
+<pre>Bias =  [ 0.0392831   0.01443088]
+s.e. =  [ 0.35045361  0.10847059]
+RMSE =  [ 0.3526484   0.10942632]
 </pre>
 </div>
 </div>
@@ -11914,9 +11914,9 @@ RMSE =  [ 0.35991995  0.10578827]
 <div class="prompt"></div>
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Bias =  [ 0.03888516  0.01213564]
-s.e. =  [ 0.32283204  0.09459337]
-RMSE =  [ 0.32516547  0.09536865]
+<pre>Bias =  [ 0.0677773  0.0104206]
+s.e. =  [ 0.31265354  0.0886861 ]
+RMSE =  [ 0.31991561  0.08929621]
 </pre>
 </div>
 </div>
@@ -11934,6 +11934,161 @@ RMSE =  [ 0.32516547  0.09536865]
 
 </div>
 </div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="&#21306;&#38388;&#20272;&#35745;">&#21306;&#38388;&#20272;&#35745;<a class="anchor-link" href="#&#21306;&#38388;&#20272;&#35745;">&#182;</a></h1><h2 id="&#23567;&#26679;&#26412;&#27491;&#24577;&#24635;&#20307;">&#23567;&#26679;&#26412;&#27491;&#24577;&#24635;&#20307;<a class="anchor-link" href="#&#23567;&#26679;&#26412;&#27491;&#24577;&#24635;&#20307;">&#182;</a></h2><p>如果$x_i\sim N\left(  \mu, \sigma^2 \right)$，那么$\bar{x}\sim N\left(\mu,\frac{\sigma^2}{N}\right)$，或者，如果我们用样本方差替代总体方差，那么有：$$\frac{\bar{x}-\mu}{\sqrt{\frac{s^2}{N}}}\sim t(N-1)$$
+因而，对于总体均值$\mu$的95%置信水平的区间估计为$$\left[\bar{x}-t_{1-\alpha}(N-1)\sqrt{\frac{s^2}{N}},\bar{x}+t_{1-\alpha}(N-1)\sqrt{\frac{s^2}{N}}\right]$$
+下面我们将重复1000次区间估计，理论上，在95%置信水平下，应该有950次区间估计包含真值，我们将看到这一结论是否成立。</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">random</span> <span class="k">as</span> <span class="n">nprd</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">special</span> <span class="k">as</span> <span class="n">func</span>
+
+<span class="k">def</span> <span class="nf">sampling</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma2</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+    <span class="n">x</span><span class="o">=</span><span class="n">nprd</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sigma2</span><span class="p">),</span><span class="n">N</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x</span>
+
+<span class="c1">## true value</span>
+<span class="n">mu</span><span class="o">=</span><span class="mi">10</span>
+<span class="n">sigma2</span><span class="o">=</span><span class="mi">30</span>
+<span class="n">N</span><span class="o">=</span><span class="mi">10</span> <span class="c1"># sample size</span>
+<span class="c1">## iteration times</span>
+<span class="n">M</span><span class="o">=</span><span class="mi">1000</span>
+<span class="c1">## confidence level</span>
+<span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span>
+<span class="c1">## results</span>
+<span class="n">included</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="p">):</span>
+    <span class="n">x</span><span class="o">=</span><span class="n">sampling</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span><span class="n">sigma2</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">xmean</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">xstd</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">lower</span><span class="o">=</span><span class="n">xmean</span><span class="o">-</span><span class="n">func</span><span class="o">.</span><span class="n">stdtrit</span><span class="p">(</span><span class="n">N</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="o">-</span><span class="n">alpha</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">xstd</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+    <span class="n">upper</span><span class="o">=</span><span class="n">xmean</span><span class="o">+</span><span class="n">func</span><span class="o">.</span><span class="n">stdtrit</span><span class="p">(</span><span class="n">N</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="o">-</span><span class="n">alpha</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">xstd</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+    <span class="c1"># 如果包含真值</span>
+    <span class="k">if</span> <span class="n">mu</span><span class="o">&gt;=</span><span class="n">lower</span> <span class="ow">and</span> <span class="n">mu</span><span class="o">&lt;=</span><span class="n">upper</span><span class="p">:</span>
+        <span class="n">included</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The prob. of included=&quot;</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">included</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+<div class="prompt"></div>
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>The prob. of included= 0.943
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="&#21306;&#38388;&#20272;&#35745;">&#21306;&#38388;&#20272;&#35745;<a class="anchor-link" href="#&#21306;&#38388;&#20272;&#35745;">&#182;</a></h1><h2 id="&#22823;&#26679;&#26412;&#24635;&#20307;&#26410;&#30693;">&#22823;&#26679;&#26412;&#24635;&#20307;&#26410;&#30693;<a class="anchor-link" href="#&#22823;&#26679;&#26412;&#24635;&#20307;&#26410;&#30693;">&#182;</a></h2><p>如果$x_i\sim \left(  \mu, \sigma^2 \right)$，那么当样本量足够大时，$\bar{x}\sim N\left(\mu,\frac{\sigma^2}{N}\right)$，或者，如果我们用样本方差替代总体方差，那么当样本量足够大时，有：$$\frac{\bar{x}-\mu}{\sqrt{\frac{s^2}{N}}}\sim N\left(0,1\right)$$
+下面我们将重复1000次区间估计，理论上，在95%置信水平下，应该有950次区间估计包含真值，我们将看到这一结论是否成立。</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">random</span> <span class="k">as</span> <span class="n">nprd</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">special</span> <span class="k">as</span> <span class="n">func</span>
+
+<span class="k">def</span> <span class="nf">sampling</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+    <span class="c1">## 产生一组样本，以0.5的概率为z+3，0.5的概率为z-3，其中z~N(0,1)，因而期望为0，方差为10</span>
+    <span class="n">d</span><span class="o">=</span><span class="n">nprd</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">N</span><span class="p">)</span><span class="o">&lt;</span><span class="mf">0.5</span>
+    <span class="n">z</span><span class="o">=</span><span class="n">nprd</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+    <span class="n">x</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">z</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="mi">3</span> <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">else</span> <span class="n">z</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="mi">3</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">)])</span>
+    <span class="k">return</span> <span class="n">x</span>
+
+<span class="c1">## true value</span>
+<span class="n">N</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mi">500</span><span class="p">,</span><span class="mi">1000</span><span class="p">]</span> <span class="c1"># sample size</span>
+<span class="c1">## iteration times</span>
+<span class="n">M</span><span class="o">=</span><span class="mi">1000</span>
+<span class="c1">## confidence level</span>
+<span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span>
+<span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">N</span><span class="p">:</span>
+    <span class="c1">## results</span>
+    <span class="n">included</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="p">):</span>
+        <span class="n">x</span><span class="o">=</span><span class="n">sampling</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">xmean</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">xstd</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">lower</span><span class="o">=</span><span class="n">xmean</span><span class="o">-</span><span class="n">func</span><span class="o">.</span><span class="n">ndtri</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">alpha</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">xstd</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">upper</span><span class="o">=</span><span class="n">xmean</span><span class="o">+</span><span class="n">func</span><span class="o">.</span><span class="n">ndtri</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">alpha</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">xstd</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="c1"># 如果包含真值</span>
+        <span class="c1">#print(mu, lower, upper, mu&gt;=lower, mu&lt;=upper)</span>
+        <span class="k">if</span> <span class="mi">0</span><span class="o">&gt;=</span><span class="n">lower</span> <span class="ow">and</span> <span class="mi">0</span><span class="o">&lt;=</span><span class="n">upper</span><span class="p">:</span>
+            <span class="n">included</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sample size=</span><span class="si">%s</span><span class="s2">, the prob. of included=&quot;</span> <span class="o">%</span> <span class="n">n</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">included</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+<div class="prompt"></div>
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Sample size=10, the prob. of included= 0.909
+Sample size=50, the prob. of included= 0.951
+Sample size=100, the prob. of included= 0.95
+Sample size=500, the prob. of included= 0.942
+Sample size=1000, the prob. of included= 0.95
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span> 
+</pre></div>
+
+</div>
+</div>
+</div>
+
 </div>
     </div>
   </div>
